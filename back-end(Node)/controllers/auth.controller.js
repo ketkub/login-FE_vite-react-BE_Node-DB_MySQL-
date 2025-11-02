@@ -28,7 +28,7 @@ export const register = async (req, res) => {
         const token = crypto.randomBytes(32).toString("hex");
         const expiresAt = new Date(Date.now() + 24*60*60*1000);
         await VerifyEmail.create({ userId: newUser.id, token , expiresAt })
-        const verifyURL = `http://localhost:5000/api/verify?token=${token}`;
+        const verifyURL = `http://localhost:5000/api/auth/verify?token=${token}`;
 
         await transporter.sendMail({
             from: ` <ketnadech@gmail.com>`,
@@ -96,6 +96,8 @@ export const login = async (req, res) => {
         user.lastLogin = new Date();
             await user.save();
         const token = jwt.sign({ userId: user.id }, "Test_Key", { expiresIn: "1h" });
+        user.failedLoginAttempts = 0;
+        await user.save();
         res.status(200).json({ message: "Login successful", token });
     } catch (error) {
         res.status(500).json({ message: "Error logging in", error: error.message })
@@ -112,7 +114,7 @@ export const forgotPassword = async (req, res) => {
     const expiresAt = new Date(Date.now() + 15*60*1000); 
     await PasswordReset.create({ userId: user.id, token, expiresAt });
 
-    const resetURL = `http://localhost:5000/api/reset-password?token=${token}`;
+    const resetURL = `http://localhost:5000/api/auth/reset-password?token=${token}`;
     await transporter.sendMail({
       from: ` <ketnadech@gmail.com>`,
       to: email,
@@ -133,9 +135,7 @@ export const resetPassword = async (req, res) => {
     const entry = await PasswordReset.findOne({ where: { token, used: false } });
     if (!entry || entry.expiresAt < new Date()) return res.status(400).json({ message: "Invalid or expired token" });
 
-    const decoded = jwt.verify(token, "Test_Key");
-
-    const user = await User.findOne({ where: { email: decoded.email } });
+    const user = await User.findOne({ where: { id: entry.userId } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.password = await bcrypt.hash(newPassword, 10);

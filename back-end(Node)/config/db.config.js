@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 
-export const sequelize = new Sequelize("login", "postgres", "1234", {
+export const sequelize = new Sequelize("shop", "postgres", "1234", {
   host: "localhost",
-  port: "5432",
+  port: "7777",
   dialect: "postgres",
 });
