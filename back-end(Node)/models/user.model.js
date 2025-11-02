@@ -15,4 +15,21 @@ export const User = sequelize.define("User", {
     allowNull: false,
     unique: true,
   },
+  isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  lastLogin: { 
+    type: DataTypes.DATE, 
+    allowNull: true 
+  },
+  failedLoginAttempts: { 
+    type: DataTypes.INTEGER, 
+    defaultValue: 0 
+  },
+  isLocked: { 
+    type: DataTypes.BOOLEAN, 
+    defaultValue: false 
+  }
+
 });
