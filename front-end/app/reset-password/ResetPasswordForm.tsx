@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState('');
@@ -25,12 +29,12 @@ export default function ResetPasswordForm() {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      alert('Passwords do not match');
       return;
     }
     
     if (!token) {
-      setError('Invalid or missing reset token.');
+      alert('Invalid or missing reset token.');
       return;
     }
 
@@ -65,56 +69,42 @@ export default function ResetPasswordForm() {
     }
   };
 
-  // ถ้าไม่มี token ก็ไม่ต้องแสดงฟอร์ม
   if (!token && !error) {
     return <div>Validating token...</div>;
   }
 
   return (
+    <div className="flex justify-center items-start pt-20 min-h-screen">
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md rounded-lg bg-white p-8 shadow-md"
+      className="p-8 w-full max-w-md space-y-4 dark:bg-slate-800 shadow-md border-0 rounded-lg"
     >
-      <h2 className="mb-6 text-center text-2xl font-bold">Reset Your Password</h2>
+      <h2 className="text-center text-2xl font-bold">Reset Your Password</h2>
 
-      <div className="mb-4">
-        <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
-          New Password
-        </label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring"
-        />
-      </div>
+      <div>
+          <Label style={{ marginBottom: '8px' }}>Email</Label>
+          <Input
+            type="password"
+            placeholder="Enter your email"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
-      <div className="mb-6">
-        <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-700">
-          Confirm New Password
-        </label>
-        <input
-          type="password"
-          id="confirmPassword"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none focus:ring"
-        />
-      </div>
+      <div>
+          <Label style={{ marginBottom: '8px' }}>confirm Password</Label>
+          <Input
+            type="password"
+            placeholder="confirm your Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </div>
 
-      <button
-        type="submit"
-        disabled={isLoading || !token}
-        className="w-full rounded-md bg-blue-500 p-2 text-white hover:bg-blue-600 disabled:opacity-50"
-      >
-        {isLoading ? 'Resetting...' : 'Reset Password'}
-      </button>
-
-      {message && <p className="mt-4 text-center text-green-500">{message}</p>}
-      {error && <p className="mt-4 text-center text-red-500">{error}</p>}
+      <Button type="submit" className="w-full mt-2 cursor-pointer">
+          Submit
+        </Button>
     </form>
+    </div>
   );
 }
