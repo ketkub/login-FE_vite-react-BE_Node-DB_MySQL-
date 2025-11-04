@@ -51,10 +51,10 @@ export const getCart = async (req, res) => {
           include: [
             {
               model: Product,
-              as: "Product", 
+              as: "Product",
               attributes: [
                 "id",
-                "name", 
+                "name",
                 "price",
               ],
             },
@@ -77,21 +77,38 @@ export const getCart = async (req, res) => {
   }
 };
 
-export const removeFromCart = async (req, res) => {
+export const removeCartItemById = async (req, res) => {
   try {
-    const userId = req.userId;
-    const { id } = req.body;
-    const cart = await Cart.findOne({ where: { userid: userId, status: "pending" } });
-    if (!cart) return res.status(400).json({ message: "Cart not found" });
-    const item = await CartItem.findOne({ where: { cartId: cart.id, productId } });
-    if (!item) return res.status(400).json({ message: "Item not found in cart" });
+    const userId = req.userId; // มาจาก middleware
+    const { id } = req.params; // id ของ CartItem
+
+    // หา CartItem และตรวจสอบว่าอยู่ใน cart ของ user
+    const item = await CartItem.findOne({
+      where: { id }, // ⚡ CartItem.id
+      include: [
+        {
+          model: Cart,
+          where: { userid: userId, status: "pending" },
+        },
+      ],
+    });
+
+    if (!item)
+      return res
+        .status(404)
+        .json({ message: "CartItem not found or not in your cart" });
+
+    // ลบ CartItem.id
     await item.destroy();
-    res.json({ message: "Item removed from cart" });
+
+    res.json({ message: `CartItem id ${id} removed` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
 
 export const removeallFromCart = async (req, res) => {
   try {
@@ -109,31 +126,32 @@ export const removeallFromCart = async (req, res) => {
 export const updateCartItemQuantity = async (req, res) => {
   try {
     const userId = req.userId;
-    // รับ productId และ newQuantity จาก body
-    const { productId, newQuantity } = req.body;
+    const { cartItemId, newQuantity } = req.body;
 
-    // ตรวจสอบว่า newQuantity เป็นตัวเลขที่ > 0
+    // ตรวจสอบ newQuantity
     if (typeof newQuantity !== "number" || newQuantity <= 0) {
       return res
         .status(400)
         .json({ message: "Invalid quantity. Must be greater than 0." });
     }
 
+    // หา cart ของ user
     const cart = await Cart.findOne({
       where: { userid: userId, status: "pending" },
     });
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
+    // หา CartItem ตาม id ของ CartItem และ cartId
     const item = await CartItem.findOne({
-      where: { cartId: cart.id, productId: productId },
+      where: { id: cartItemId, cartId: cart.id },
     });
 
     if (!item)
       return res.status(404).json({ message: "Item not found in cart" });
 
-    // อัปเดตจำนวนสินค้า
+    // อัปเดต quantity
     item.quantity = newQuantity;
-    await item.save(); // บันทึกการเปลี่ยนแปลง
+    await item.save();
 
     res.json({ message: "Quantity updated successfully", updatedItem: item });
   } catch (error) {
@@ -142,12 +160,13 @@ export const updateCartItemQuantity = async (req, res) => {
   }
 };
 
+
 export const checkout = async (req, res) => {
   const userId = req.userId;
 
   const cart = await Cart.findOne({
     where: { userid: userId, status: "pending" },
-    include: [{ model: CartItem, as: "items", include: [{ model: Product, as: "product" }] }]
+    include: [{ model: CartItem, as: "items", include: [{ model: Product, as: "Product" }] }]
   });
 
   if (!cart || cart.items.length === 0)

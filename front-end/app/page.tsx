@@ -107,45 +107,47 @@ export default function HomePage() {
   }, [page]);
 
   return (
-    <div className="min-h-screen bg-linear-to-br ">
-      <div className="container mx-auto p-6 lg:p-8">
+    <div className="min-h-screen ">
+      <div className="max-w-6xl mx-auto p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold">Products</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">
+            สินค้า
+          </h1>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8">
           {products.map((product) => (
             <Card
               key={product.id}
-              className="group overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-slate-800"
+              className="group border rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 grid gap-8"
             >
-              <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-700">
+              <div className="relative h-64 w-full overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-black">
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover transition-transform duration-500"
                 />
-                <Badge className="absolute top-3 right-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 hover:bg-white dark:hover:bg-slate-900 shadow-md">
+                <Badge className="absolute top-3 right-3 bg-white dark:bg-gray-900 text-slate-900 dark:text-white shadow-md">
                   {product.brand}
                 </Badge>
               </div>
 
-              <CardContent className="p-4 h-24 flex flex-col justify-between">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 line-clamp-2">
+              <CardContent className="p-6 h-36 flex flex-col justify-between">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-white line-clamp-2">
                   {product.name}
                 </h2>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-auto">
-                  {product.price} ฿
+                <p className="text-2xl font-bold text-emerald-600 dark:text-violet-600 mt-auto">
+                  {Number(product.price).toLocaleString("th-TH")} ฿
                 </p>
               </CardContent>
 
-              <CardFooter className="p-4 pt-0">
+              <CardFooter className="p-6 pt-0 flex justify-center">
                 <Button
                   onClick={() => handleAddToCart(product)}
-                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white transition-colors group/btn"
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-gray-900 dark:hover:bg-gray-800 text-white rounded-lg shadow-md transition-colors group/btn"
                 >
-                  <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
-                  Add to Cart
+                  <ShoppingCart className="w-5 h-5 mr-2 group-hover/btn:scale-110 transition-transform" />
+                  เพิ่มไปที่ตะกร้า
                 </Button>
               </CardFooter>
             </Card>
@@ -153,7 +155,7 @@ export default function HomePage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="mt-6 flex justify-center">
+          <div className="mt-8 flex justify-center">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
@@ -174,7 +176,10 @@ export default function HomePage() {
                     <PaginationLink
                       onClick={() => setPage(i + 1)}
                       isActive={page === i + 1}
-                      className="cursor-pointer"
+                      className={`cursor-pointer rounded-md px-4 py-2 transition-colors ${page === i + 1
+                          ? "bg-slate-900 text-white dark:bg-gray-800 dark:text-white"
+                          : "text-slate-700 dark:text-gray-300"
+                        }`}
                     >
                       {i + 1}
                     </PaginationLink>
@@ -183,9 +188,7 @@ export default function HomePage() {
 
                 <PaginationItem>
                   <PaginationNext
-                    onClick={() =>
-                      setPage((prev) => Math.min(prev + 1, totalPages))
-                    }
+                    onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
                     aria-disabled={page === totalPages}
                     tabIndex={page === totalPages ? -1 : undefined}
                     className={
@@ -201,5 +204,7 @@ export default function HomePage() {
         )}
       </div>
     </div>
+
+
   );
 }

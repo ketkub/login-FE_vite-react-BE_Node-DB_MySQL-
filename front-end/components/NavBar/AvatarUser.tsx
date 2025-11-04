@@ -11,10 +11,11 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User as UserIcon, LogOut } from "lucide-react"; // LogIn ไม่ได้ถูกใช้
+import { User as UserIcon, LogIn, Power, PencilIcon } from "lucide-react"; // LogIn ไม่ได้ถูกใช้
 import { useRouter, usePathname } from "next/navigation";
 import { ProfileDialog } from "@/components/Dialogs/ProfileDialog";
-import CartDialog from "../Dialogs/CartDialog";
+import { useCartStore } from "@/store/cartStore";
+import Cart from "./Cart";
 
 // 💡 [เพิ่ม] 2. เพิ่มฟังก์ชัน decodeToken (ควรย้ายไป utils)
 const decodeToken = (token: string) => {
@@ -36,6 +37,7 @@ const AvatarUser = () => {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const triggerRefetch = useCartStore((state) => state.triggerRefetch);
 
   useEffect(() => {
     const checkLogin = () => {
@@ -102,10 +104,25 @@ const AvatarUser = () => {
     setIsLoggedIn(false);
     window.dispatchEvent(new Event("login")); // ยิง event "login" (เพื่ออัปเดต state)
     router.push("/");
+    triggerRefetch();
   };
 
+  if (pathname === "/login") {
+    return ( // <--- วงเล็บต้องเริ่มที่นี่
+      <Button variant="outline" onClick={() => router.push("/register")}>
+        <PencilIcon className="w-4 h-4 mr-2 text-start" />
+        Register
+      </Button>
+    ); // <--- แล้วค่อยปิด
+  }
+
   if (pathname === "/register") {
-    return null;
+    return ( // <--- วงเล็บต้องเริ่มที่นี่
+      <Button variant="outline" onClick={() => router.push("/login")}>
+        <LogIn className="w-4 h-4 mr-2 text-start" />
+        Login
+      </Button>
+    ); // <--- แล้วค่อยปิด
   }
 
   // 💡 [แก้ไข] 4. แก้ไขโครงสร้าง JSX (ส่วนนี้ของคุณถูกต้องอยู่แล้ว)
@@ -134,22 +151,29 @@ const AvatarUser = () => {
               <DropdownMenuItem
                 onSelect={(e) => e.preventDefault()} // ป้องกันไม่ให้เมนูปิดเมื่อคลิก
               >
-                My Account
+                บัฐชีของฉัน
               </DropdownMenuItem>
             </ProfileDialog>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              <Power className="w-4 h-4 mr-2" />
+              ออกจากระบบ
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Button variant="outline" onClick={() => router.push("/login")}>
+        <div className="flex gap-3">
+        <Button variant="outline" onClick={() => router.push("/login")} className="text-center">
+          <LogIn className="w-4 h-4 mr-2 text-start" />
           Login
         </Button>
+        <Button variant="outline" onClick={() => router.push("/register")}>
+          <PencilIcon className="w-4 h-4 mr-2 text-start" />
+          Register
+        </Button>
+        </div>
       )}
     </div>
   );

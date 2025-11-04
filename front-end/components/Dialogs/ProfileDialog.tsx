@@ -21,7 +21,19 @@ import {
   Upload,
   UserCircle,
   X,
+  Save,
+  UserPenIcon,
 } from "lucide-react";
+import { IconGenderBigender } from '@tabler/icons-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils"
+import { Textarea } from "../ui/textarea";
 
 interface UserDetails {
   firstname: string;
@@ -170,7 +182,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
       const method = hasProfile ? "PUT" : "POST";
 
       if (!hasProfile) {
-        form.append("userid", userId); 
+        form.append("userid", userId);
       }
 
       const res = await fetch(url, {
@@ -251,9 +263,9 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
       <DialogContent className="sm:max-w-[700px] max-h-[85vh] overflow-y-auto">
         {/* ... (เนื้อหา Dialog ทั้งหมดเหมือนเดิม) ... */}
         <DialogHeader className="space-y-4 pb-4 border-b">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
+              <div className="w-20 h-20 rounded-full bg-linear-to-br flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
@@ -323,7 +335,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                     setFormData({ ...formData, firstname: e.target.value })
                   }
                   placeholder="Enter your first name"
-                  className="h-11"
+                  
                 />
               </div>
               <div className="space-y-2">
@@ -342,7 +354,6 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                     setFormData({ ...formData, lastname: e.target.value })
                   }
                   placeholder="Enter your last name"
-                  className="h-11"
                 />
               </div>
             </div>
@@ -352,19 +363,26 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                   htmlFor="gender"
                   className="text-sm font-semibold flex items-center gap-2"
                 >
-                  <UserCircle className="w-4 h-4" />
+                  <IconGenderBigender stroke={2} className="w-4 h-4"/>
                   Gender
                 </Label>
-                <Input
-                  id="gender"
-                  name="gender"
+                <Select
                   value={formData.gender}
-                  onChange={(e) =>
-                    setFormData({ ...formData, gender: e.target.value })
-                  }
-                  placeholder="Enter your gender"
-                  className="h-11"
-                />
+                  onValueChange={(value: string) => {
+                    setFormData({ ...formData, gender: value })
+                  }}
+                  name="gender"
+                >
+                  <SelectTrigger className="w-full">
+            
+                    <SelectValue placeholder="— เลือกเพศ —" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ชาย">ชาย</SelectItem>
+                    <SelectItem value="หญิง">หญิง</SelectItem>
+                    <SelectItem value="ไม่ระบุเพศ">ไม่ระบุเพศ</SelectItem> 
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label
@@ -382,7 +400,6 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                   onChange={(e) =>
                     setFormData({ ...formData, birthDate: e.target.value })
                   }
-                  className="h-11"
                 />
               </div>
             </div>
@@ -402,7 +419,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                   setFormData({ ...formData, phone: e.target.value })
                 }
                 placeholder="Enter your phone number"
-                className="h-11"
+
               />
             </div>
             <div className="space-y-2">
@@ -413,7 +430,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                 <MapPin className="w-4 h-4" />
                 Address
               </Label>
-              <Input
+              <Textarea 
                 id="address"
                 name="address"
                 value={formData.address}
@@ -421,79 +438,78 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                   setFormData({ ...formData, address: e.target.value })
                 }
                 placeholder="Enter your address"
-                className="h-11"
               />
             </div>
           </div>
         ) : (
           <div className="py-6">
             <div className="grid gap-6">
-              <div className="bg-linear-to-r from-blue-50 to-purple-50 rounded-lg p-6 space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                    <User className="w-6 h-6 text-blue-600" />
+              <div className="bg-linear-to-r rounded-lg p-6 space-y-4">
+                <div className="flex items-start gap-4 dark:border-purple-500 dark:border-2 dark:rounded-ee-full p-4 m-2 border-black border-2 rounded-4xl">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 dark:border-purple-500 border-2 border-black">
+                    <User className="w-6 h-6" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-500 mb-1">
+                    <p className="text-sm font-medium mb-1 rounded-4xl border-2 w-30 text-center dark:bg-purple-950 dark:text-white bg-black text-white">
                       Full Name
                     </p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-black dark:text-white">
                       {profile?.firstname} {profile?.lastname}
                     </p>
                   </div>
                 </div>
                 {profile?.gender && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
-                      <UserCircle className="w-6 h-6 text-purple-600" />
+                  <div className="flex items-start gap-4 dark:border-purple-500 dark:border-2 dark:rounded-ee-full p-4 m-2 border-black border-2 rounded-4xl">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 dark:border-purple-500 border-2 border-black">
+                      <UserCircle className="w-6 h-6 " />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-500 mb-1">
+                      <p className="text-sm font-medium mb-1 rounded-4xl border-2 w-30 text-center dark:bg-purple-950 dark:text-white bg-black text-white">
                         Gender
                       </p>
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-semibold text-black dark:text-white">
                         {profile?.gender}
                       </p>
                     </div>
                   </div>
                 )}
                 {profile?.birthDate && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                      <Calendar className="w-6 h-6 text-green-600" />
+                  <div className="flex items-start gap-4 dark:border-purple-500 dark:border-2 dark:rounded-ee-full p-4 m-2 border-black border-2 rounded-4xl">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 dark:border-purple-500 border-2 border-black">
+                      <Calendar className="w-6 h-6 " />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-500 mb-1">
+                      <p className="text-sm font-medium mb-1 rounded-4xl border-2 w-30 text-center dark:bg-purple-950 dark:text-white bg-black text-white">
                         Birth Date
                       </p>
-                      <p className="text-lg font-semibold text-gray-900">
+                      <p className="text-lg font-semibold text-black dark:text-white">
                         {profile?.birthDate}
                       </p>
                     </div>
                   </div>
                 )}
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-                    <Phone className="w-6 h-6 text-orange-600" />
+                <div className="flex items-start gap-4 dark:border-purple-500 dark:border-2 dark:rounded-ee-full p-4 m-2 border-black border-2 rounded-4xl">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 dark:border-purple-500 border-2 border-black">
+                    <Phone className="w-6 h-6" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-500 mb-1">
+                    <p className="text-sm font-medium mb-1 rounded-4xl border-2 w-30 text-center dark:bg-purple-950 dark:text-white bg-black text-white">
                       Phone Number
                     </p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-black dark:text-white">
                       {profile?.phone || "Not provided"}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                    <MapPin className="w-6 h-6 text-red-600" />
+                <div className="flex items-start gap-4 dark:border-purple-500 dark:border-2 dark:rounded-ee-full p-4 m-2 border-black border-2 rounded-4xl">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 dark:border-purple-500 border-2 border-black">
+                    <MapPin className="w-6 h-6 " />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-500 mb-1">
+                    <p className="text-sm font-medium mb-1 rounded-4xl border-2 w-30 text-center dark:bg-purple-950 dark:text-white bg-black text-white">
                       Address
                     </p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-black dark:text-white">
                       {profile?.address || "Not provided"}
                     </p>
                   </div>
@@ -506,21 +522,24 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
         <DialogFooter className="flex gap-3 pt-4 border-t">
           <DialogClose asChild>
             <Button variant="outline" className="flex-1 h-11">
+              <X className="w-4 h-4 mr-2 text-start" />
               Cancel
             </Button>
           </DialogClose>
           {editMode ? (
             <Button
               onClick={handleSave}
-              className="flex-1 h-11 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="flex-1 h-11 bg-linear-to-r"
             >
+              <Save className="w-4 h-4 mr-2 text-start" />
               Save Changes
             </Button>
           ) : (
             <Button
               onClick={() => setEditMode(true)}
-              className="flex-1 h-11 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="flex-1 h-11 bg-linear-to-r"
             >
+              <UserPenIcon className="w-4 h-4 mr-2 text-start" />
               Edit Profile
             </Button>
           )}

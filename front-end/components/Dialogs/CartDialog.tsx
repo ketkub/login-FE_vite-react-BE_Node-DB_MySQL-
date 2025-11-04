@@ -9,23 +9,21 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus } from "lucide-react";
-import { useCartStore } from "@/store/cartStore"; // 👈 1. Import มาจากไฟล์กลาง
+import { useCartStore } from "@/store/cartStore";
 
 const CartDialog = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [totalPrice, setTotalPrice] = useState(0);
 
-  // --- ⭐️ 2. ดึง state และ action ที่จำเป็น ⭐️ ---
+  // Zustand store
   const setCartCount = useCartStore((state) => state.setCartCount);
-  const version = useCartStore((state) => state.version); // 👈 ดึง 'version' มา
-  const triggerRefetch = useCartStore((state) => state.triggerRefetch); // 👈 ดึง 'trigger' มา
+  const version = useCartStore((state) => state.version);
+  const triggerRefetch = useCartStore((state) => state.triggerRefetch);
 
-  // --- ฟังก์ชันดึงข้อมูลตะกร้า ---
+  // --- ดึงข้อมูลตะกร้า ---
   const fetchCart = async () => {
-    console.log("Fetching cart data (triggered by version change)...");
     const token = localStorage.getItem("token");
     if (!token) {
-      // ถ้าเปิดตะกร้าโดยไม่ได้ login ให้เคลียร์ค่า
       setCartItems([]);
       setTotalPrice(0);
       setCartCount(0);
@@ -38,7 +36,6 @@ const CartDialog = () => {
       });
 
       if (!res.ok) {
-        // อาจจะ 401 (Token หมดอายุ) หรือ 404
         setCartItems([]);
         setTotalPrice(0);
         setCartCount(0);
@@ -46,23 +43,15 @@ const CartDialog = () => {
       }
 
       const data = await res.json();
-      console.log("Cart data fetched:", data);
-
       const items = data.cart?.items || [];
       setCartItems(items);
 
-      if (items.length > 0) {
-        const sum = items.reduce(
-          (sum: number, item: any) => sum + item.quantity * item.Product.price,
-          0
-        );
-        setTotalPrice(sum);
-        // นับจำนวน 'ชนิด' ของสินค้า ไม่ใช่จำนวนชิ้นทั้งหมด
-        setCartCount(items.length); // อัปเดตตัวเลข (count) ที่ Navbar
-      } else {
-        setTotalPrice(0);
-        setCartCount(0);
-      }
+      const sum = items.reduce(
+        (sum: number, item: any) => sum + item.quantity * item.Product.price,
+        0
+      );
+      setTotalPrice(sum);
+      setCartCount(items.length);
     } catch (error) {
       console.error("Failed to fetch cart:", error);
       setCartItems([]);
@@ -71,20 +60,18 @@ const CartDialog = () => {
     }
   };
 
-  // --- ⭐️ 3. (สำคัญ) เปลี่ยน useEffect ให้ "ฟัง" version ⭐️ ---
+  // Fetch cart ทุกครั้งที่ 'version' เปลี่ยน
   useEffect(() => {
     fetchCart();
-  }, [version]); // 👈 เมื่อ 'version' เปลี่ยน -> fetchCart() จะทำงาน
+  }, [version]);
 
-  // --- ⭐️ 4. handle... ALL ⭐️ ---
-  // ทุกฟังก์ชันที่ทำสำเร็จ จะเรียก 'triggerRefetch()'
-  // เพื่อให้ useEffect จัดการ refetch เอง
-
-  const handleUpdateQuantity = async (productId: string, newQuantity: number) => {
+  // --- เพิ่ม/ลดจำนวน ---
+  const handleUpdateQuantity = async (cartItemId: number, newQuantity: number) => {
     if (newQuantity < 1) {
-      handleRemoveItem(productId); // (handleRemoveItem จะ trigger เอง)
+      handleRemoveItem(cartItemId);
       return;
     }
+
     try {
       const token = localStorage.getItem("token");
       const res = await fetch("http://localhost:5000/api/cart/update", {
@@ -93,11 +80,11 @@ const CartDialog = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ productId, newQuantity }),
+        body: JSON.stringify({ cartItemId, newQuantity }),
       });
+
       if (res.ok) {
-        console.log("Quantity updated");
-        triggerRefetch(); // 👈 เรียก trigger
+        triggerRefetch();
       } else {
         console.error("Failed to update quantity");
       }
@@ -106,27 +93,27 @@ const CartDialog = () => {
     }
   };
 
-  const handleRemoveItem = async (productId: string) => {
+  // --- ลบ item ทีละชิ้น ---
+  const handleRemoveItem = async (cartItemId: number) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `http://localhost:5000/api/cart/remove/${productId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`http://localhost:5000/api/cart/item/${cartItemId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       if (res.ok) {
-        console.log("Item removed");
-        triggerRefetch(); // 👈 เรียก trigger
+        triggerRefetch();
       } else {
-        console.error("Failed to remove item");
+        const data = await res.json();
+        console.error("Failed to remove item:", data.message);
       }
     } catch (error) {
       console.error("Error removing item:", error);
     }
   };
 
+  // --- ลบทั้งหมด ---
   const handleClearCart = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -134,9 +121,9 @@ const CartDialog = () => {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (res.ok) {
-        console.log("Cart cleared");
-        triggerRefetch(); // 👈 เรียก trigger
+        triggerRefetch();
       } else {
         console.error("Failed to clear cart");
       }
@@ -145,7 +132,6 @@ const CartDialog = () => {
     }
   };
 
-  // ... (ส่วน JSX ที่เหลือเหมือนเดิมเป๊ะ) ...
   return (
     <DialogContent className="max-w-md">
       <DialogHeader>
@@ -155,10 +141,7 @@ const CartDialog = () => {
       <div className="space-y-4 max-h-[300px] overflow-y-auto">
         {cartItems.length > 0 ? (
           cartItems.map((item: any) => (
-            <div
-              key={item.id}
-              className="flex justify-between items-center border-b pb-2"
-            >
+            <div key={item.id} className="flex justify-between items-center border-b pb-2">
               <div className="flex-1">
                 <p className="font-medium">{item.Product.name}</p>
                 <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -166,9 +149,7 @@ const CartDialog = () => {
                     variant="outline"
                     size="icon"
                     className="h-6 w-6"
-                    onClick={() =>
-                      handleUpdateQuantity(item.Product.id, item.quantity - 1)
-                    }
+                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                   >
                     <Minus className="h-3 w-3" />
                   </Button>
@@ -177,25 +158,23 @@ const CartDialog = () => {
                     variant="outline"
                     size="icon"
                     className="h-6 w-6"
-                    onClick={() =>
-                      handleUpdateQuantity(item.Product.id, item.quantity + 1)
-                    }
+                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                   >
                     <Plus className="h-3 w-3" />
                   </Button>
-                  <span>x {item.Product.price} บาท</span>
+                  <span>x {Number(item.Product.price).toLocaleString("en-US")} บาท</span>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
                 <p className="font-bold">
-                  {item.quantity * item.Product.price} ฿
+                  {(item.quantity * Number(item.Product.price)).toLocaleString("en-US")} ฿
                 </p>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="text-red-500 hover:text-red-700"
-                  onClick={() => handleRemoveItem(item.Product.id)}
+                  onClick={() => handleRemoveItem(item.id)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -203,15 +182,13 @@ const CartDialog = () => {
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-500 py-6">
-            ยังไม่มีสินค้าในตะกร้า
-          </p>
+          <p className="text-center text-gray-500 py-6">ยังไม่มีสินค้าในตะกร้า</p>
         )}
       </div>
 
       <div className="flex justify-between border-t pt-3 font-semibold">
         <p>รวมทั้งหมด:</p>
-        <p>{totalPrice} ฿</p>
+        <p>{totalPrice.toLocaleString("en-US")} ฿</p>
       </div>
 
       <DialogFooter className="mt-2 sm:justify-between">
@@ -231,7 +208,7 @@ const CartDialog = () => {
             onClick={() => (window.location.href = "/checkout")}
             disabled={cartItems.length === 0}
           >
-            ไปชำระเงิน
+            ชำระเงิน
           </Button>
         </div>
       </DialogFooter>
