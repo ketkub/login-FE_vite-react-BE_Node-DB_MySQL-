@@ -253,7 +253,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
         <DialogHeader className="space-y-4 pb-4 border-b">
           <div className="flex items-center gap-4">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
+              <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
@@ -428,9 +428,9 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
         ) : (
           <div className="py-6">
             <div className="grid gap-6">
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 space-y-4">
+              <div className="bg-linear-to-r from-blue-50 to-purple-50 rounded-lg p-6 space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                     <User className="w-6 h-6 text-blue-600" />
                   </div>
                   <div className="flex-1">
@@ -444,7 +444,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                 </div>
                 {profile?.gender && (
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center shrink-0">
                       <UserCircle className="w-6 h-6 text-purple-600" />
                     </div>
                     <div className="flex-1">
@@ -459,7 +459,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                 )}
                 {profile?.birthDate && (
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                       <Calendar className="w-6 h-6 text-green-600" />
                     </div>
                     <div className="flex-1">
@@ -473,7 +473,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                   </div>
                 )}
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
                     <Phone className="w-6 h-6 text-orange-600" />
                   </div>
                   <div className="flex-1">
@@ -486,7 +486,7 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                     <MapPin className="w-6 h-6 text-red-600" />
                   </div>
                   <div className="flex-1">
@@ -512,14 +512,14 @@ export function ProfileDialog({ children, onProfileUpdate }: ProfileDialogProps)
           {editMode ? (
             <Button
               onClick={handleSave}
-              className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="flex-1 h-11 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               Save Changes
             </Button>
           ) : (
             <Button
               onClick={() => setEditMode(true)}
-              className="flex-1 h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="flex-1 h-11 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               Edit Profile
             </Button>
