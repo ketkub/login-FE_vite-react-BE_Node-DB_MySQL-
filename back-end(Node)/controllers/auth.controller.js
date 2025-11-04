@@ -114,7 +114,7 @@ export const forgotPassword = async (req, res) => {
     const expiresAt = new Date(Date.now() + 15*60*1000); 
     await PasswordReset.create({ userId: user.id, token, expiresAt });
 
-    const resetURL = `http://localhost:5001/reset-password?token=${token}`;
+    const resetURL = `http://localhost:3000/reset-password?token=${token}`;
     await transporter.sendMail({
       from: ` <ketnadech@gmail.com>`,
       to: email,

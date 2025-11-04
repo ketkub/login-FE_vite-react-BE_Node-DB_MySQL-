@@ -2,18 +2,20 @@ import { User } from "../models/user.model.js";
 import { UserDetails } from "../models/user-details.model.js";
 
 export const setupProfileUser = async (req, res) => {
-  const { userid, firstname, lastname, gender, avatar, address, phone, birthDate } = req.body;
+  const { userid, firstname, lastname, gender, address, phone, birthDate } = req.body;
     try {
       const user = await User.findByPk(userid);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
+        const avatarUrl = req.file ? req.file.filename : null;
+
         const userDetails = await UserDetails.create({
           userid,
           firstname,
           lastname,
           gender,
-          avatar,
+          avatar: avatarUrl,
           address,
           phone,
           birthDate,
@@ -45,7 +47,7 @@ export const showProfileUser = async (req, res) => {
 
 export const updateProfileUser = async (req, res) => {
   const { userid } = req.params;
-  const { firstname, lastname, gender, avatar, address, phone, birthDate } = req.body;  
+  const { firstname, lastname, gender, address, phone, birthDate } = req.body;  
     try {
       const user = await User.findByPk(userid);
         if (!user) {
@@ -55,10 +57,13 @@ export const updateProfileUser = async (req, res) => {
         if (!userDetails) {
             return res.status(404).json({ message: "User details not found" });
         }
+
+        const avatarUrl = req.file ? `/uploads/${req.file.filename}` : userDetails.avatar;
+
         userDetails.firstname = firstname || userDetails.firstname;
         userDetails.lastname = lastname || userDetails.lastname;
         userDetails.gender = gender || userDetails.gender;
-        userDetails.avatar = avatar || userDetails.avatar;
+        userDetails.avatar = avatarUrl;
         userDetails.address = address || userDetails.address;
         userDetails.phone = phone || userDetails.phone;
         userDetails.birthDate = birthDate || userDetails.birthDate;

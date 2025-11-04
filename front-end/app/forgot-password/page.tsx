@@ -19,9 +19,13 @@ export default function RegisterPage() {
     });
 
     if (res.ok) {
-      alert("Password reset link sent to your email");
+      alert("Password reset link sent to your email")
+      setEmail("");
+      setUsername("");
     } else {
       alert("Failed to send reset link");
+      setEmail("");
+      setUsername("");
     }
   };
 
@@ -29,7 +33,7 @@ export default function RegisterPage() {
     <div className="flex justify-center items-start pt-20 min-h-screen">
       <form
         onSubmit={handleSubmit}
-        className="p-8 w-full max-w-md space-y-4 dark:bg-slate-800 shadow-md border-0 rounded-lg"
+        className="p-10 rounded-2xl w-full max-w-md space-y-6 shadow-2xl border border-gray-300 dark:border-gray-700/50 backdrop-blur-lg"
       >
         <h1 className="text-2xl font-bold text-center">Reset Password</h1>
         <div>
@@ -37,6 +41,7 @@ export default function RegisterPage() {
           <Input
             type="username"
             placeholder="Enter your email"
+            className="dark:bg-black dark:text-white"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -47,12 +52,13 @@ export default function RegisterPage() {
           <Input
             type="email"
             placeholder="Enter your email"
+            className="dark:bg-black dark:text-white"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <Button type="submit" className="w-full mt-2 cursor-pointer">
+        <Button type="submit" className="w-full mt-2 cursor-pointer dark:bg-black dark:text-white hover:dark:bg-white hover:dark:text-black hover:text-black hover:bg-white">
           Submit
         </Button>
       </form>

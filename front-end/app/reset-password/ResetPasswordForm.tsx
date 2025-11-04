@@ -77,31 +77,31 @@ export default function ResetPasswordForm() {
     <div className="flex justify-center items-start pt-20 min-h-screen">
     <form
       onSubmit={handleSubmit}
-      className="p-8 w-full max-w-md space-y-4 dark:bg-slate-800 shadow-md border-0 rounded-lg"
+      className="p-10 rounded-2xl w-full max-w-md space-y-6 shadow-2xl border border-gray-300 dark:border-gray-700/50 backdrop-blur-lg"
     >
-      <h2 className="text-center text-2xl font-bold">Reset Your Password</h2>
+      <h2 className="text-center text-2xl font-bold">Reset Password</h2>
 
       <div>
-          <Label style={{ marginBottom: '8px' }}>Email</Label>
+          <Label style={{ marginBottom: '8px' }}>New Password</Label>
           <Input
             type="password"
-            placeholder="Enter your email"
+            placeholder="Enter new password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
       <div>
-          <Label style={{ marginBottom: '8px' }}>confirm Password</Label>
+          <Label style={{ marginBottom: '8px' }}>Confirm Password</Label>
           <Input
             type="password"
-            placeholder="confirm your Password"
+            placeholder="Confirm your Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
 
-      <Button type="submit" className="w-full mt-2 cursor-pointer">
+      <Button type="submit" className="w-full mt-2 cursor-pointer dark:bg-black dark:text-white hover:dark:bg-white hover:dark:text-black hover:text-black hover:bg-white">
           Submit
         </Button>
     </form>
