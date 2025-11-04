@@ -119,9 +119,9 @@ export default function HomePage() {
           {products.map((product) => (
             <Card
               key={product.id}
-              className="group border rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 grid gap-8"
+              className="group border rounded-4xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 grid gap-8"
             >
-              <div className="relative h-64 w-full overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-black">
+              <div className="relative h-64 w-full overflow-hidden rounded-4xl bg-slate-100 dark:bg-black ">
                 <img
                   src={product.image}
                   alt={product.name}
@@ -132,11 +132,11 @@ export default function HomePage() {
                 </Badge>
               </div>
 
-              <CardContent className="p-6 h-36 flex flex-col justify-between">
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-white line-clamp-2">
+              <CardContent className="p-6 h-36 flex flex-col justify-between rounded-tr-xs w-80 mx-auto">
+                <h2 className="text-md font-bold dark:text-white line-clamp-2 font-sans text-center w-65 border-black border-2 text-black dark:bg-violet-900 mx-auto h-12 flex items-center justify-center rounded-2xl px-2 ">
                   {product.name}
                 </h2>
-                <p className="text-2xl font-bold text-emerald-600 dark:text-violet-600 mt-auto">
+                <p className="text-2xl font-bold text-emerald-600 dark:text-white text-center mt-1">
                   {Number(product.price).toLocaleString("th-TH")} ฿
                 </p>
               </CardContent>
@@ -144,7 +144,7 @@ export default function HomePage() {
               <CardFooter className="p-6 pt-0 flex justify-center">
                 <Button
                   onClick={() => handleAddToCart(product)}
-                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-gray-900 dark:hover:bg-gray-800 text-white rounded-lg shadow-md transition-colors group/btn"
+                  className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-gray-900 dark:hover:bg-gray-800 text-white rounded-lg shadow-md transition-colors group/btn mx-a "
                 >
                   <ShoppingCart className="w-5 h-5 mr-2 group-hover/btn:scale-110 transition-transform" />
                   เพิ่มไปที่ตะกร้า
