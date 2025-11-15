@@ -30,6 +30,10 @@ export const User = sequelize.define("User", {
   isLocked: { 
     type: DataTypes.BOOLEAN, 
     defaultValue: false 
+  },
+  role: {
+    type: DataTypes.ENUM("user", "admin"),
+    defaultValue: "user"
   }
 
 });

@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { User as UserIcon, LogIn, Power, PencilIcon } from "lucide-react"; // LogIn ไม่ได้ถูกใช้
+import { User as UserIcon, LogIn, Power, PencilIcon, HistoryIcon } from "lucide-react"; // LogIn ไม่ได้ถูกใช้
 import { useRouter, usePathname } from "next/navigation";
 import { ProfileDialog } from "@/components/Dialogs/ProfileDialog";
 import { useCartStore } from "@/store/cartStore";
@@ -63,7 +63,7 @@ const AvatarUser = () => {
 
     const user = decodeToken(token);
     if (!user?.userId) {
-      console.error("DEBUG: Token decode failed or no userId");
+      //console.error("DEBUG: Token decode failed or no userId");
       return;
     }
 
@@ -155,6 +155,11 @@ const AvatarUser = () => {
               </DropdownMenuItem>
             </ProfileDialog>
 
+            <DropdownMenuItem onClick={() => router.push('/history-orders')}>
+              <HistoryIcon className="w-4 h-4 mr-2" />
+              ประวัติการสั่งซื้อ
+            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleLogout}>
@@ -165,14 +170,14 @@ const AvatarUser = () => {
         </DropdownMenu>
       ) : (
         <div className="flex gap-3">
-        <Button variant="outline" onClick={() => router.push("/login")} className="text-center">
-          <LogIn className="w-4 h-4 mr-2 text-start" />
-          Login
-        </Button>
-        <Button variant="outline" onClick={() => router.push("/register")}>
-          <PencilIcon className="w-4 h-4 mr-2 text-start" />
-          Register
-        </Button>
+          <Button variant="outline" onClick={() => router.push("/login")} className="text-center">
+            <LogIn className="w-4 h-4 mr-2 text-start" />
+            Login
+          </Button>
+          <Button variant="outline" onClick={() => router.push("/register")}>
+            <PencilIcon className="w-4 h-4 mr-2 text-start" />
+            Register
+          </Button>
         </div>
       )}
     </div>

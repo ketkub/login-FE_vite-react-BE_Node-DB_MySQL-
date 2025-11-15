@@ -1,9 +1,44 @@
 import { Product } from "../models/product.model.js";
+import multer from "multer";
+import path from "path";
+
+// Multer setup สำหรับ product images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, "product-" + Date.now() + path.extname(file.originalname)),
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowed = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+  if (!allowed.includes(file.mimetype)) {
+    return cb(new Error("Invalid file type"), false);
+  }
+  cb(null, true);
+};
+
+export const uploadProductImage = multer({ storage, fileFilter });
 
 export const createProduct = async (req, res) => {
     try {
-        const { name, description, price, image, category, brand, InStock} = req.body;
-        const newProduct = await Product.create({ name, description, price, image, category, brand, InStock });
+        const { name, description, price, category, brand, InStock } = req.body;
+        
+        // ใช้ชื่อไฟล์จากการ upload ถ้ามี ไม่ใช่จาก body
+        const image = req.file ? `/uploads/${req.file.filename}` : null;
+        
+        if (!image) {
+            return res.status(400).json({ message: "Image is required" });
+        }
+        
+        const newProduct = await Product.create({ 
+            name, 
+            description, 
+            price, 
+            image,  // ใช้ path ที่อัพโหลดได้
+            category, 
+            brand, 
+            InStock 
+        });
         res.status(201).json({ message: "Product created successfully", product: newProduct });
     } catch (error) {
         res.status(400).json({ message: "Error creating product", error: error.message });

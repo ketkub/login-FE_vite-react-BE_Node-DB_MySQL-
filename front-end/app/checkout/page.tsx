@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,21 +20,34 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/store/cartStore";
-import { Loader2, CreditCard, Banknote, Package } from "lucide-react";
+import { Loader2, CreditCard, Banknote, Package, ArrowRight } from "lucide-react";
 
 // Component สำหรับแสดงเมื่อสั่งซื้อสำเร็จ
-const OrderSuccess = () => (
-    <div className="flex flex-col items-center justify-center text-center p-8">
+const OrderSuccess = ({ orderId, onBackHome }: { orderId?: string; onBackHome: () => void }) => (
+    <div className="flex flex-col items-center justify-center text-center p-8 min-h-screen dark:bg-gray-900">
         <Package className="w-16 h-16 text-green-500 mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">ขอบคุณสำหรับการสั่งซื้อ!</h2>
-        <p className="text-gray-600 mb-6">เราได้รับคำสั่งซื้อของคุณแล้ว และกำลังดำเนินการจัดส่ง</p>
-        <Button onClick={() => (window.location.href = "/")}>
-            กลับไปหน้าแรก
-        </Button>
+        <h2 className="text-2xl font-semibold mb-2 dark:text-white">ขอบคุณสำหรับการสั่งซื้อ!</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-2">เราได้รับคำสั่งซื้อของคุณแล้ว</p>
+        {orderId && (
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+                เลขที่ Order: <span className="font-semibold">{orderId}</span>
+            </p>
+        )}
+        <p className="text-gray-600 dark:text-gray-400 mb-6">กำลังดำเนินการจัดส่งให้คุณ</p>
+        <div className="flex gap-3">
+            <Button onClick={onBackHome}>
+                กลับไปหน้าแรก
+                <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+            <Button variant="outline" onClick={() => (window.location.href = "/history-order")}>
+                ดูประวัติการสั่งซื้อ
+            </Button>
+        </div>
     </div>
 );
 
 const CheckoutPage = () => {
+    const router = useRouter();
     // State สำหรับตะกร้า
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [totalPrice, setTotalPrice] = useState(0);
@@ -51,6 +65,7 @@ const CheckoutPage = () => {
     const [isPlacingOrder, setIsPlacingOrder] = useState(false); // สำหรับตอนกดสั่งซื้อ
     const [error, setError] = useState<string | null>(null);
     const [orderSuccess, setOrderSuccess] = useState(false);
+    const [orderId, setOrderId] = useState<string | undefined>(undefined);
 
     // Zustand store
     const setCartCount = useCartStore((state) => state.setCartCount);
@@ -106,8 +121,13 @@ const CheckoutPage = () => {
 
     // ดึงข้อมูลตะกร้าเมื่อ component โหลด
     useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.push("/login");
+            return;
+        }
         fetchCart();
-    }, []);
+    }, [router]);
 
     // --- 2. จัดการการเปลี่ยนแปลงในฟอร์ม ---
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,7 +161,7 @@ const CheckoutPage = () => {
         };
 
         try {
-            const res = await fetch("http://localhost:5000/api/orders", { // สมมติ endpoint
+            const res = await fetch("http://localhost:5000/api/cart/checkout", { // สมมติ endpoint
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -156,6 +176,8 @@ const CheckoutPage = () => {
             }
 
             // ถ้าสำเร็จ
+            const responseData = await res.json();
+            setOrderId(responseData.id?.toString());
             setOrderSuccess(true);
             triggerRefetch(); // บอกให้ส่วนอื่นๆ (เช่น Navbar) โหลดข้อมูลใหม่ (ตะกร้าจะว่าง)
         } catch (err: any) {
@@ -181,7 +203,10 @@ const CheckoutPage = () => {
     if (orderSuccess) {
         return (
             <div className="max-w-4xl mx-auto p-4 md:p-8">
-                <OrderSuccess />
+                <OrderSuccess 
+                    orderId={orderId}
+                    onBackHome={() => router.push("/")}
+                />
             </div>
         );
     }
@@ -194,8 +219,8 @@ const CheckoutPage = () => {
                 {error !== "ตะกร้าของคุณว่างเปล่า" && (
                     <Button onClick={fetchCart}>ลองอีกครั้ง</Button>
                 )}
-                <Button variant="link" onClick={() => window.location.href = '/'}>
-                    กลับไปหน้าแรก
+                <Button variant="outline" onClick={() => window.location.href = '/shop-products'}>
+                    ซื้อสินค้าต่อที่หน้าสินค้า
                 </Button>
             </div>
         );
@@ -203,46 +228,50 @@ const CheckoutPage = () => {
 
     // แสดงหน้า Checkout หลัก
     return (
-        <div className="max-w-6xl mx-auto p-4 md:p-8">
-            <h1 className="text-3xl font-bold mb-6">ชำระเงิน</h1>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+            <div className="max-w-6xl mx-auto p-4 md:p-8">
+                <h1 className="text-3xl font-bold mb-6 dark:text-white">ชำระเงิน</h1>
 
-            <form
-                onSubmit={handlePlaceOrder}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start"
-            >
+                <form
+                    onSubmit={handlePlaceOrder}
+                    className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start"
+                >
                 {/* คอลัมน์ซ้าย: ข้อมูลจัดส่งและชำระเงิน */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* ข้อมูลการจัดส่ง */}
-                    <Card>
+                    <Card className="dark:bg-gray-800">
                         <CardHeader>
-                            <CardTitle>ข้อมูลการจัดส่ง</CardTitle>
+                            <CardTitle className="dark:text-white">ข้อมูลการจัดส่ง</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">ชื่อ-นามสกุล</Label>
+                                <Label htmlFor="name" className="dark:text-white">ชื่อ-นามสกุล</Label>
                                 <Input
                                     id="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
+                                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="address">ที่อยู่</Label>
+                                <Label htmlFor="address" className="dark:text-white">ที่อยู่</Label>
                                 <Input
                                     id="address"
                                     value={formData.address}
                                     onChange={handleInputChange}
+                                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="phone">เบอร์โทรศัพท์</Label>
+                                <Label htmlFor="phone" className="dark:text-white">เบอร์โทรศัพท์</Label>
                                 <Input
                                     id="phone"
                                     type="tel"
                                     value={formData.phone}
                                     onChange={handleInputChange}
+                                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     required
                                 />
                             </div>
@@ -250,16 +279,16 @@ const CheckoutPage = () => {
                     </Card>
 
                     {/* วิธีชำระเงิน */}
-                    <Card>
+                    <Card className="dark:bg-gray-800">
                         <CardHeader>
-                            <CardTitle>วิธีชำระเงิน</CardTitle>
+                            <CardTitle className="dark:text-white">วิธีชำระเงิน</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                                <SelectTrigger>
+                                <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                     <SelectValue placeholder="เลือกวิธีชำระเงิน" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="dark:bg-gray-800">
                                     <SelectItem value="cod">
                                         <div className="flex items-center space-x-2">
                                             <Banknote className="h-4 w-4" />
@@ -280,28 +309,28 @@ const CheckoutPage = () => {
 
                 {/* คอลัมน์ขวา: สรุปคำสั่งซื้อ */}
                 <div className="lg:col-span-1 sticky top-8">
-                    <Card>
+                    <Card className="dark:bg-gray-800">
                         <CardHeader>
-                            <CardTitle>สรุปคำสั่งซื้อ</CardTitle>
+                            <CardTitle className="dark:text-white">สรุปคำสั่งซื้อ</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {cartItems.map((item) => (
                                 <div key={item.id} className="flex justify-between items-start">
                                     <div>
-                                        <p className="font-medium">{item.Product.name}</p>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="font-medium dark:text-white">{item.Product.name}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
                                             จำนวน: {item.quantity}
                                         </p>
                                     </div>
-                                    <p className="font-medium">
+                                    <p className="font-medium dark:text-white">
                                         {(item.quantity * Number(item.Product.price)).toLocaleString("en-US")} ฿
                                     </p>
                                 </div>
                             ))}
-                            <Separator />
-                            <div className="flex justify-between font-bold text-lg">
+                            <Separator className="dark:bg-gray-700" />
+                            <div className="flex justify-between font-bold text-lg dark:text-white">
                                 <p>ยอดรวมทั้งหมด:</p>
-                                <p>{totalPrice.toLocaleString("en-US")} ฿</p>
+                                <p className="text-blue-600 dark:text-blue-400">{totalPrice.toLocaleString("en-US")} ฿</p>
                             </div>
                         </CardContent>
                         <CardFooter className="flex-col items-stretch space-y-2">
@@ -309,6 +338,7 @@ const CheckoutPage = () => {
                                 type="submit"
                                 size="lg"
                                 disabled={isPlacingOrder || cartItems.length === 0}
+                                className="dark:bg-blue-600 dark:hover:bg-blue-700"
                             >
                                 {isPlacingOrder ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -317,12 +347,13 @@ const CheckoutPage = () => {
                                 )}
                             </Button>
                             {error && !isPlacingOrder && (
-                                <p className="text-sm text-red-500 text-center">{error}</p>
+                                <p className="text-sm text-red-500 dark:text-red-400 text-center">{error}</p>
                             )}
                         </CardFooter>
                     </Card>
                 </div>
             </form>
+            </div>
         </div>
     );
 };

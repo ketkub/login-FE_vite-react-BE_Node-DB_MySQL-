@@ -87,7 +87,7 @@ export const login = async (req, res) => {
             await user.save();
             return res.status(401).json({ message: "Invalid password" });
         }
-        if (!user.isVerified) {
+        if (!user.isVerified && user.role !== "admin") {
             return res.status(401).json({ message: "Please verify your email before login" });
         }
         if (user.isLocked) {
@@ -95,10 +95,10 @@ export const login = async (req, res) => {
         }
         user.lastLogin = new Date();
             await user.save();
-        const token = jwt.sign({ userId: user.id }, "Test_Key", { expiresIn: "1h" });
+        const token = jwt.sign({ userId: user.id, role: user.role }, "Test_Key", { expiresIn: "1h" });
         user.failedLoginAttempts = 0;
         await user.save();
-        res.status(200).json({ message: "Login successful", token });
+        res.status(200).json({ message: "Login successful", token, role: user.role });
     } catch (error) {
         res.status(500).json({ message: "Error logging in", error: error.message })
     };
@@ -149,5 +149,32 @@ export const resetPassword = async (req, res) => {
     console.error(err);
     console.error("Verify Email Error:", err.name, err.message);
     res.status(500).json({ message: "Error resetting password", error: err.message });
+  }
+};
+
+export const registerAdmin = async (req, res) => {
+  const { email, username, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) return res.status(400).json({ message: "Email already registered" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newAdmin = await User.create({ 
+      email, 
+      username, 
+      password: hashedPassword, 
+      isVerified: true,  
+      role: "admin"
+    });
+
+    res.status(201).json({ 
+      message: "Admin user created successfully", 
+      user: { id: newAdmin.id, username: newAdmin.username, email: newAdmin.email, role: newAdmin.role }
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error creating admin user", error: err.message });
   }
 };
