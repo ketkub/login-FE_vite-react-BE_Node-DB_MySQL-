@@ -8,8 +8,8 @@ const LoginAdmin = () => {
   const router = useRouter();
   return (
     <div>
-      <Button variant="outline" size="icon" className="text-center" onClick={() => router.push("/for-admin/login-admin")}>
-          <IconAssembly stroke={2} />
+      <Button variant="outline" onClick={() => router.push("/for-admin/login-admin")}>
+          <IconAssembly stroke={2} className='mr-2 h-4 w-4'/>
             Login as Admin
         </Button>
     </div>

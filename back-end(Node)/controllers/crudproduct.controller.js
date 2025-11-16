@@ -86,7 +86,7 @@ export const getProductById = async (req, res) => {
 export const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, price, image, category, brand, InStock} = req.body;
+        const { name, description, price, category, brand, InStock} = req.body;
         const product = await Product.findByPk(id);
         if (!product) 
         {
@@ -95,7 +95,10 @@ export const updateProduct = async (req, res) => {
         product.name = name || product.name;
         product.description = description || product.description;
         product.price = price || product.price;
-        product.image = image || product.image;
+        // หากมีการอัพโหลดรูปภาพใหม่ ให้อัปเดต image
+        if (req.file) {
+            product.image = `/uploads/${req.file.filename}`;
+        }
         product.category = category || product.category;
         product.brand = brand || product.brand;
         product.InStock = InStock || product.InStock;
